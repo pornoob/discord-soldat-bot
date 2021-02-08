@@ -1,6 +1,6 @@
 import net from "net";
 
-import FileSystem from "./fileSystem.js";
+import FileSystem from "./filesystem.js";
 import GameMode from "./gamemodes.js";
 
 import PauseCommand from "./commands/pause.js";
