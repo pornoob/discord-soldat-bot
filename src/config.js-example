@@ -1,0 +1,12 @@
+export default {
+  discord: {
+      BOT_TOKEN: "<token>",
+  },
+
+  soldatserver: {
+    ip: "<ip/host>",
+    port: 23073,
+    password: "<password>",
+    admin_password: "<admin_password>"
+  },
+}
