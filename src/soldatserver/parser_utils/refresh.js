@@ -15,8 +15,10 @@ const INFO_BYTES_OFFSET = IPS_BYTES_OFFSET + MAX_PLAYERS * 4;
 
 export default {
   players: null,
+  players_count: 0,
   parse(data) {
     this.players = [];
+    let UNKNOW_BYTES = MAX_PLAYERS * 2 - this.players_count * 2;
 
     const packet = Buffer.from(data);
     let buffer_position;
@@ -37,23 +39,24 @@ export default {
       this.players[i].team = packet[buffer_position];
 
       // Getting Kills
-      buffer_position = KILLS_BYTES_OFFSET + (i * 2);
+      buffer_position = KILLS_BYTES_OFFSET + i * 2 + UNKNOW_BYTES;
       this.players[i].kills = (packet[buffer_position] | (packet[buffer_position + 1] << 8));
 
       // Getting Deaths
-      buffer_position = DEATHS_BYTES_OFFSET + (i * 2);
+      buffer_position = DEATHS_BYTES_OFFSET + i * 2 + UNKNOW_BYTES;
       this.players[i].deaths = (packet[buffer_position] | (packet[buffer_position + 1] << 8));
 
       // Getting PING
-      buffer_position = PINGS_BYTES_OFFSET + i;
+      buffer_position = PINGS_BYTES_OFFSET + i + UNKNOW_BYTES;
       this.players[i].ping = packet[buffer_position];
 
       // Getting Player ID
-      buffer_position = IDS_BYTES_OFFSET + i;
+      buffer_position = IDS_BYTES_OFFSET + i + UNKNOW_BYTES;
       this.players[i].id = packet[buffer_position];
     }
 
     this.players = this.players.filter(player => !!player.name);
-    console.log({players: this.players});
+    this.players_count = this.players.length;
+    // console.log({players: this.players});
   }
 };

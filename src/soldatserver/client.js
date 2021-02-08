@@ -1,7 +1,10 @@
 import net from "net";
+
+import FileSystem from "./fileSystem.js";
+import GameMode from "./gamemodes.js";
+
 import PauseCommand from "./commands/pause.js";
 import MapsCommand from "./commands/maps.js";
-import GameMode from "./gamemodes.js";
 
 import Parser from "./parser.js";
 import RefreshParser from "./parser_utils/refresh.js";
@@ -26,6 +29,9 @@ export default {
     console.log("Connected to soldatserver admin console");
     console.log("Sending password: ****");
     this.client.write(`${this.config.admin_password}\r\n`);
+    setInterval(() => {
+      this.client.write(`REFRESH\r\n`);
+    }, 300);
   },
 
   on_close(error) {
@@ -44,27 +50,27 @@ export default {
 
   on_server_message(data) {
     const refresh_command = "REFRESH\r\n";
-    if (data.startsWith(refresh_command)) {
-      console.log("REFRESH Detected!")
-      RefreshParser.parse(data.slice(refresh_command.length));
-    } else if (data.length === 1188) {
-      console.log("REFRESH Detected!")
-      RefreshParser.parse(data); 
+    const idx = data.indexOf(refresh_command);
+    if (idx !== -1) {
+      RefreshParser.parse(data.slice(idx + refresh_command.length));
     } else {
       console.log({server: data});
-      if (data.indexOf("has joined") !== -1) this.client.write(`REFRESH\r\n`);
-      else if (data.indexOf("has left") !== -1) this.client.write(`REFRESH\r\n`);
     }
   },
 
   on_player_command(nickname, command, args) {
+    let player;
     switch (command) {
       case "!gm":
       case "!gamemode":
         if (!args.length) return;
         this.client.write(`/gamemode ${GameMode[args[0].toUpperCase()]}\r\n`);
       case "!hello": this.client.write(`/say CerdoBot: Oing! Hello ${nickname}\r\n`);break;
-      case "!map": this.client.write(`/map ${args[0]}\r\n`);break;
+      case "!map":
+        if (!args.length) return;
+        let map = FileSystem.maps.find(map => map.toUpperCase().indexOf(args[0].toLowerCase()) !== -1);
+        this.client.write(`/map ${map}\r\n`);
+        break;
       case "!p":
       case "!pause":
         PauseCommand.pause(this.client);break;
@@ -77,6 +83,33 @@ export default {
         this.client.write(`/restart\r\n`);break;
       case "!1":
       case "!a":
+      case "!alpha":
+        player = RefreshParser.players.find(player => player.name === nickname);
+        this.client.write(`/SETTEAM1 ${player.id}\r\n`);
+        break;
+      case "!2":
+      case "!b":
+      case "!bravo":
+        player = RefreshParser.players.find(player => player.name === nickname);
+        this.client.write(`/SETTEAM2 ${player.id}\r\n`);
+        break;
+      case "!3":
+      case "!c":
+      case "!charlie":
+        let player = RefreshParser.players.find(player => player.name === nickname);
+        this.client.write(`/SETTEAM3 ${player.id}\r\n`);
+        break;
+      case "!4":
+      case "!d":
+      case "!delta":
+        player = RefreshParser.players.find(player => player.name === nickname);
+        this.client.write(`/SETTEAM4 ${player.id}\r\n`);
+        break;
+      case "!5":
+      case "!s":
+      case "!spec":
+        player = RefreshParser.players.find(player => player.name === nickname);
+        this.client.write(`/SETTEAM5 ${player.id}\r\n`);
         break;
       case "!maps": MapsCommand.maps(this.client, 0);break
       case "!maps2": MapsCommand.maps(this.client, 1);break

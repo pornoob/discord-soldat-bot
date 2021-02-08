@@ -7,6 +7,7 @@ export default {
     ip: "<ip/host>",
     port: 23073,
     password: "<password>",
-    admin_password: "<admin_password>"
+    admin_password: "<admin_password>",
+    path: "<path>",
   },
 }
