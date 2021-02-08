@@ -1,5 +1,4 @@
 import EventEmitter from "events";
-import RefreshxData from "./refreshx.js";
 
 export default {
   emitter: new EventEmitter(),
