@@ -7,11 +7,10 @@ import PauseCommand from "./commands/pause.js";
 import MapsCommand from "./commands/maps.js";
 
 import Parser from "./parser.js";
-import RefreshParser from "./parser_utils/refresh.js";
 import ServerMessageParser from "./parser_utils/server.js";
 
 export default {
-  refresh_detected: false,
+  bot_nick: "CerdoBot",
   connect(soldatserver) {
     this.client = net.Socket();
     this.config = soldatserver;
@@ -29,9 +28,6 @@ export default {
     console.log("Connected to soldatserver admin console");
     console.log("Sending password: ****");
     this.client.write(`${this.config.admin_password}\r\n`);
-    setInterval(() => {
-      this.client.write(`REFRESH\r\n`);
-    }, 300);
   },
 
   on_close(error) {
@@ -65,22 +61,35 @@ export default {
       case "!gamemode":
         if (!args.length) return;
         this.client.write(`/gamemode ${GameMode[args[0].toUpperCase()]}\r\n`);
-      case "!hello": this.client.write(`/say CerdoBot: Oing! Hello ${nickname}\r\n`);break;
+      case "!hello": this.client.write(`/say ${this.bot_nick}: Oing! Hello ${nickname}\r\n`);break;
       case "!map":
         if (!args.length) return;
-        let map = FileSystem.maps.find(map => {
+        let maps = FileSystem.maps.filter(map => {
           return map.toLowerCase().indexOf(args[0].toLowerCase()) !== -1 &&
           map.length - args[0].length <= 4;
         });
-        if (map) this.client.write(`/map ${map}\r\n`);
-        else this.client.write(`/map ${args[0]}\r\n`);
+        console.log({maps});
+        if (maps.length) {
+          let map = maps[0];
+          const regex = /^(ctf|htf|inf)_/;
+          let map1_length = regex.test(map) ? map.length - 4 : map.length;
+          let map2_length = 0;
+          for (let i = 1; i < maps.length; i++) {
+            map2_length = regex.test(maps[i]) ? maps[i].length - 4 : maps[i].length;
+            if (map2_length <= map1_length) {
+              map = maps[i];
+              map1_length = map2_length;
+            }
+          }
+          this.client.write(`/map ${map}\r\n`);
+        } else this.client.write(`/map ${args[0]}\r\n`);
         break;
       case "!maps": MapsCommand.maps(this.client, 0);break
       case "!maps2": MapsCommand.maps(this.client, 1);break
       case "!ub":
       case "!unban":
         this.client.write(`/UNBANLAST\r\n`);
-        this.client.write(`/SAY CerdoBot: UNBANLAST\r\n`);
+        this.client.write(`/SAY ${this.bot_nick}: UNBANLAST\r\n`);
       case "!test":
         this.client.write(`REFRESH\r\n`);break;
     }
