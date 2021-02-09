@@ -68,8 +68,12 @@ export default {
       case "!hello": this.client.write(`/say CerdoBot: Oing! Hello ${nickname}\r\n`);break;
       case "!map":
         if (!args.length) return;
-        let map = FileSystem.maps.find(map => map.toUpperCase().indexOf(args[0].toLowerCase()) !== -1);
-        this.client.write(`/map ${map}\r\n`);
+        let map = FileSystem.maps.find(map => {
+          return map.toLowerCase().indexOf(args[0].toLowerCase()) !== -1 &&
+          map.length - args[0].length <= 4;
+        });
+        if (map) this.client.write(`/map ${map}\r\n`);
+        else this.client.write(`/map ${args[0]}\r\n`);
         break;
       case "!maps": MapsCommand.maps(this.client, 0);break
       case "!maps2": MapsCommand.maps(this.client, 1);break
