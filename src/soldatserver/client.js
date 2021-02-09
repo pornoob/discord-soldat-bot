@@ -71,46 +71,6 @@ export default {
         let map = FileSystem.maps.find(map => map.toUpperCase().indexOf(args[0].toLowerCase()) !== -1);
         this.client.write(`/map ${map}\r\n`);
         break;
-      case "!p":
-      case "!pause":
-        PauseCommand.pause(this.client);break;
-        break;
-      case "!up":
-      case "!unpause":
-        PauseCommand.unpause(this.client);break;
-      case "!r":
-      case "!restart":
-        this.client.write(`/restart\r\n`);break;
-      case "!1":
-      case "!a":
-      case "!alpha":
-        player = RefreshParser.players.find(player => player.name === nickname);
-        this.client.write(`/SETTEAM1 ${player.id}\r\n`);
-        break;
-      case "!2":
-      case "!b":
-      case "!bravo":
-        player = RefreshParser.players.find(player => player.name === nickname);
-        this.client.write(`/SETTEAM2 ${player.id}\r\n`);
-        break;
-      case "!3":
-      case "!c":
-      case "!charlie":
-        let player = RefreshParser.players.find(player => player.name === nickname);
-        this.client.write(`/SETTEAM3 ${player.id}\r\n`);
-        break;
-      case "!4":
-      case "!d":
-      case "!delta":
-        player = RefreshParser.players.find(player => player.name === nickname);
-        this.client.write(`/SETTEAM4 ${player.id}\r\n`);
-        break;
-      case "!5":
-      case "!s":
-      case "!spec":
-        player = RefreshParser.players.find(player => player.name === nickname);
-        this.client.write(`/SETTEAM5 ${player.id}\r\n`);
-        break;
       case "!maps": MapsCommand.maps(this.client, 0);break
       case "!maps2": MapsCommand.maps(this.client, 1);break
       case "!ub":
