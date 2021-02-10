@@ -28,6 +28,11 @@ export default {
     console.log("Connected to soldatserver admin console");
     console.log("Sending password: ****");
     this.client.write(`${this.config.admin_password}\r\n`);
+    setTimeout(() => {
+      this.client.write(`/SAY ${this.bot_nick} has been initialized\r\n`);
+      this.client.write(`/SAY ${this.bot_nick}: Setting the password to ${this.config.password}\r\n`);
+      this.client.write(`/PASSWORD ${this.config.password}\r\n`);
+    }, 500);
   },
 
   on_close(error) {
@@ -89,9 +94,22 @@ export default {
       case "!ub":
       case "!unban":
         this.client.write(`/UNBANLAST\r\n`);
-        this.client.write(`/SAY ${this.bot_nick}: UNBANLAST\r\n`);
-      case "!test":
-        this.client.write(`REFRESH\r\n`);break;
+        this.client.write(`/SAY ${this.bot_nick}: UNBANLAST applied\r\n`);
+        break;
+      case "!sp":
+      case "!pw":
+      case "!password":
+        let min = 1000;
+        let max = 10000;
+        let random = parseInt(Math.random() * (max - min) + min);
+        this.client.write(`/SAY ${this.bot_nick}: Setting password to ${random}\r\n`);
+        this.client.write(`/PASSWORD ${random}\r\n`);
+        this.config.password = random;
+        break;
+      case "!msg":
+        console.log(`Emitting message to discord\r\n`);
+        this.client.emit("discord_message", nickname, args.join(" "));
+        break;
     }
   },
 }

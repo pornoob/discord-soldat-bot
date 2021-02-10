@@ -1,8 +1,9 @@
-import processors from "./processors/main.js";
+import EventEmitter from "events";
 
 export default {
   command_prefix: "!",
   channels: ["general"],
+  emitter: new EventEmitter(),
 
   parse(message) {
     // ignoring if it is not a command
@@ -12,10 +13,10 @@ export default {
     const content = message.content.slice(this.command_prefix.length);
     const args = content.split(" ");
     const command = args.shift().toLowerCase();
-    this.process(command, args, message);
+    this.emitter.emit("command", command, args, message);
   },
 
-  process(command, args, context) {
-    processors.map((processor) => { processor.parse(command, args, context) })
+  on(event, callback) {
+    this.emitter.on(event, callback);
   }
 }
