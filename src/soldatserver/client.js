@@ -1,13 +1,7 @@
 import net from "net";
 
-import FileSystem from "./filesystem.js";
-import GameMode from "./gamemodes.js";
-
-import PauseCommand from "./commands/pause.js";
-import MapsCommand from "./commands/maps.js";
-
+import commands from "./commands.js";
 import Parser from "./parser.js";
-import ServerMessageParser from "./parser_utils/server.js";
 
 export default {
   bot_nick: "CerdoBot",
@@ -50,66 +44,22 @@ export default {
   },
 
   on_server_message(data) {
-    const refresh_command = "REFRESH\r\n";
-    const idx = data.indexOf(refresh_command);
-    if (idx !== -1) {
-      RefreshParser.parse(data.slice(idx + refresh_command.length));
-    } else {
-      console.log({server: data});
-    }
+    console.log({server: data});
   },
 
   on_player_command(nickname, command, args) {
-    let player;
-    switch (command) {
-      case "!gm":
-      case "!gamemode":
-        if (!args.length) return;
-        this.client.write(`/gamemode ${GameMode[args[0].toUpperCase()]}\r\n`);
-      case "!hello": this.client.write(`/say ${this.bot_nick}: Oing! Hello ${nickname}\r\n`);break;
-      case "!map":
-        if (!args.length) return;
-        let maps = FileSystem.maps.filter(map => {
-          return map.toLowerCase().indexOf(args[0].toLowerCase()) !== -1 &&
-          map.length - args[0].length <= 4;
-        });
-        console.log({maps});
-        if (maps.length) {
-          let map = maps[0];
-          const regex = /^(ctf|htf|inf)_/;
-          let map1_length = regex.test(map) ? map.length - 4 : map.length;
-          let map2_length = 0;
-          for (let i = 1; i < maps.length; i++) {
-            map2_length = regex.test(maps[i]) ? maps[i].length - 4 : maps[i].length;
-            if (map2_length <= map1_length) {
-              map = maps[i];
-              map1_length = map2_length;
-            }
+    for (let i = 0; i < commands.length; i++) {
+      console.log(`Checking command: ${commands[i].name}`);
+      for (let j = 0; j < commands[i].triggers.length; j++) {
+        if (command.toLowerCase() === commands[i].triggers[j].toLowerCase()) {
+          commands[i].context = {
+            bot_nick: this.bot_nick,
+            client: this.client,
           }
-          this.client.write(`/map ${map}\r\n`);
-        } else this.client.write(`/map ${args[0]}\r\n`);
-        break;
-      case "!maps": MapsCommand.maps(this.client, 0);break
-      case "!maps2": MapsCommand.maps(this.client, 1);break
-      case "!ub":
-      case "!unban":
-        this.client.write(`/UNBANLAST\r\n`);
-        this.client.write(`/SAY ${this.bot_nick}: UNBANLAST applied\r\n`);
-        break;
-      case "!sp":
-      case "!pw":
-      case "!password":
-        let min = 1000;
-        let max = 10000;
-        let random = parseInt(Math.random() * (max - min) + min);
-        this.client.write(`/SAY ${this.bot_nick}: Setting password to ${random}\r\n`);
-        this.client.write(`/PASSWORD ${random}\r\n`);
-        this.config.password = random;
-        break;
-      case "!msg":
-        console.log(`Emitting message to discord\r\n`);
-        this.client.emit("discord_message", nickname, args.join(" "));
-        break;
+          commands[i].execute(nickname, args);
+          return;
+        }
+      }
     }
   },
 }
