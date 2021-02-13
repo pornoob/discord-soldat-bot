@@ -1,41 +1,27 @@
 import Discord from "discord.js";
+import fs from "fs";
+
 import config from "./config.js";
 import Parser from "./parser.js";
 import Soldat from "./soldatserver/client.js"
 
 const client = new Discord.Client();
+client.commands = new Discord.Collection();
+
+const files = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
+for (const file of files) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.default.name, command.default);
+}
 
 client.on("message", (message) => { Parser.parse(message) });
 
 Parser.on("command", (command, args, context) => {
-  switch (command) {
-    case "soldat":
-      if (args.length) {
-        switch (args[0]) {
-          case "server":
-            const url = `soldat://${config.soldatserver.ip}:${config.soldatserver.port}/${config.soldatserver.password}`;
-            const link = new Discord.MessageEmbed();
-            link.setColor("#f4000e");
-            link.setTitle("K4t4n4 Soldat Server");
-            link.addField("#1", `[${url}](${url})`);
-            context.channel.send(link);
-            break;
-          case "reset_password":
-            context.channel.send(`\`\`\`setting password to: ${first_password}\`\`\``);
-            soldat_client.write(`/PASSWORD ${first_password}\r\n`);
-            config.soldatserver.password = first_password;
-            break;
-        }
-      }
-      break;
-    case "msg":
-      if (!args.length) break;
-      context.channel.send(`\`\`\`Sending message to K4t4n4 Server\`\`\``);
-      soldat_client.write(`/SAY ${context.author.username}: ${args.join(" ")}\r\n`);
-      break;
-    case "test":
-      break;
-  }
+  if (!client.commands.has(command)) return;
+  client.commands.get(command).context = {
+    soldat_client
+  };
+  client.commands.get(command).execute(context, args);
 });
 
 client.login(config.discord.BOT_TOKEN);

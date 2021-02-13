@@ -55,6 +55,7 @@ export default {
           commands[i].context = {
             bot_nick: this.bot_nick,
             client: this.client,
+            config: this.config,
           }
           commands[i].execute(nickname, args);
           return;
