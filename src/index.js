@@ -11,7 +11,11 @@ client.commands = new Discord.Collection();
 const files = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
 for (const file of files) {
   const command = require(`./commands/${file}`);
-  client.commands.set(command.default.name, command.default);
+  if (Array.isArray(command.default.name))
+    for (const trigger of command.default.name)
+      client.commands.set(trigger, command.default);
+  else
+    client.commands.set(command.default.name, command.default);
 }
 
 client.on("message", (message) => { Parser.parse(message) });

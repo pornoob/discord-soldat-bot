@@ -15,7 +15,8 @@ export default {
         const link = new Discord.MessageEmbed();
         link.setColor("#f4000e");
         link.setTitle("K4t4n4 Soldat Server");
-        link.addField("#1", `[${url}](${url})`);
+        link.addField("#1", `<${url}>`);
+        link.setImage("https://soldat.s3-sa-east-1.amazonaws.com/katana-arena-logo.png");
         message.channel.send(link);
         break;
       case "reset_password":
