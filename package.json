@@ -19,7 +19,8 @@
   "author": "Claudio Olivares",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.5.1"
+    "discord.js": "^12.5.1",
+    "mathjs": "^9.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.13",
